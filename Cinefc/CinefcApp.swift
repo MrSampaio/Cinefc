@@ -29,4 +29,6 @@ struct CinefcApp: App {
         }
         .modelContainer(sharedModelContainer)
     }
+    
+    
 }
