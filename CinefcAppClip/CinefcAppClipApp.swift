@@ -1,22 +1,22 @@
 //
-//  TicketsClipApp.swift
-//  TicketsClip
+//  CinefcAppClipApp.swift
+//  CinefcAppClip
 //
-//  Created by Igor Carrasco on 28/10/26.
+//  Created by Julio Sampaio on 03/11/26.
 //
 
 import SwiftUI
 
 @main
-struct TicketsClipApp: App {
-    @State private var showID: String?
+struct CinefcAppClipApp: App {
+    @State private var movieID: String?
     @State private var timedOut = false
-
+    
     var body: some Scene {
         WindowGroup {
             Group {
-                if let showID {
-                    ShowDetailView(showID: showID)
+                if let movieID {
+                    MovieDetailsView(movieID: movieID)
                 } else if timedOut {
                     ContentUnavailableView(
                         "Escaneie o QR Code do evento",
@@ -30,11 +30,11 @@ struct TicketsClipApp: App {
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                 guard let url = activity.webpageURL else { return }
                 print("URL Recebida: ", url.absoluteString)
-                showID = DeepLink.showID(from: url)
+                movieID = DeepLink.movieID(from: url)
             }
             .task {
                 try? await Task.sleep(for: .seconds(3))
-                if showID == nil { timedOut = true }
+                if movieID == nil { timedOut = true }
             }
         }
     }

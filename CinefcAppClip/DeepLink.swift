@@ -8,7 +8,7 @@
 import Foundation
 
 enum DeepLink {
-    static func showID(from url: URL) -> String? {
+    static func movieID(from url: URL) -> String? {
         URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems?
             .first(where: { $0.name == "id" })?
