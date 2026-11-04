@@ -1,5 +1,5 @@
 //
-//  ShowDetailView.swift
+//  MovieDetailsView.swift
 //  TicketsClip
 //
 //  Created by Igor Carrasco on 28/10/26.
@@ -8,85 +8,16 @@
 import SwiftUI
 import PassKit
 
-@MainActor
-@Observable
-final class ShowDetailViewModel {
-    enum State { case loading, loaded(Show), failed(String) }
-
-    var state: State = .loading
-    var quantity = 1
-    var paymentMessage: String?
-    var order: Order?
-
-    private let payment = ApplePayService()
-
-    func load(id: String) async {
-        do { state = .loaded(try await ShowRepository.fetch(id: id)) }
-        catch { state = .failed("Evento não encontrado.") }
-    }
-
-    func total(for show: Show) -> Decimal {
-        show.unitPrice * Decimal(quantity)
-    }
-
-    func pay(show: Show) async {
-        do {
-            order = try await payment.pay(show: show, quantity: quantity)
-        } catch ApplePayService.PayError.cancelled {
-            // usuário cancelou: sem alerta
-        } catch ApplePayService.PayError.unavailable {
-            paymentMessage = "Apple Pay indisponível. Adicione um cartão na Carteira."
-        } catch {
-            paymentMessage = "Falha no pagamento. Tente novamente."
-        }
-    }
-    
-    func reset() {
-        order = nil
-        quantity = 1
-    }
-}
-
 struct MovieDetailsView: View {
-//    let showID: String
-//    @State private var vm = ShowDetailViewModel()
-//
-//    var body: some View {
-//        Group {
-//            if let order = vm.order {
-//                PurchaseConfirmationView(order: order) {
-//                    vm.reset()
-//                }
-//            } else {
-//                switch vm.state {
-//                case .loading:
-//                    ProgressView()
-//                case .failed(let message):
-//                    ContentUnavailableView(message, systemImage: "ticket")
-//                case .loaded(let show):
-//                    content(show)
-//                }
-//            }
-//        }
-//        .task(id: showID) { await vm.load(id: showID) }
-//        .alert("Pagamento",
-//               isPresented: Binding(
-//                   get: { vm.paymentMessage != nil },
-//                   set: { if !$0 { vm.paymentMessage = nil } })
-//        ) {
-//            Button("OK") {}
-//        } message: {
-//            Text(vm.paymentMessage ?? "")
-//        }
-//    }
-    
     let movieID: String
     
+    // Estados locais da View para controlar o carregamento e os dados
     @State private var movie: MovieDetails? = nil
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
     
-    @State private var moviesViewModel = MoviesViewModel()
+    // Instanciamos o serviço diretamente
+    @State private var apiService = MoviesApiService()
     
     @State private var quantity: Int = 0
     @State private var quantityMeia: Int = 0
@@ -108,28 +39,29 @@ struct MovieDetailsView: View {
 //            await moviesViewModel.getMovieFromApi(id: movieID)
 //        }
         .task(id: movieID) {
-                    // Se estiver rodando no Preview do Xcode, pula a API e bota um mock instantâneo
-                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-                        self.movie = MovieDetails(
-                            id: Int(movieID) ?? 1,
-                            title: "Filme de Teste",
-                            synopsis: "Sinopse exibida apenas no preview para testar o layout.",
-                            coverUrl: "",
-                            showtimes: [
-                                Showtime(id: 1, startTime: "14:30"),
-                                Showtime(id: 2, startTime: "18:00")
-                            ]
-                        )
-                        self.isLoading = false
-                        return
-                    }
-                    
-                    // Seu fluxo normal de API para quando rodar no App real
-                    await moviesViewModel.getMovieFromApi(id: movieID)
-                    // Lembre de atualizar isLoading = false dentro do seu MoviesViewModel quando terminar
-                }
+            await fetchMovie()
+        }
     }
-
+    
+    // função auxiliar para manter o .task limpo
+    private func fetchMovie() async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            // Aqui fazemos a chamada e recebemos o filme diretamente da função!
+            let fetchedMovie = try await apiService.fetchMovie(id: movieID)
+            
+            // Atualizamos o estado da View com o filme recebido
+            self.movie = fetchedMovie
+            self.isLoading = false
+            
+        } catch {
+            self.errorMessage = "Não foi possível carregar os detalhes do filme."
+            self.isLoading = false
+        }
+    }
+    
     @ViewBuilder
     private func content(_ movie: MovieDetails) -> some View {
         ScrollView {

@@ -60,7 +60,7 @@
          <EnvironmentVariable
             key = "_XCAppClipURL"
             value = "https://cinefc.com/?id=1"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>
