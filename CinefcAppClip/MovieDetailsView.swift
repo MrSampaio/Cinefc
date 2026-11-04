@@ -19,8 +19,11 @@ struct MovieDetailsView: View {
     // Instanciamos o serviço diretamente
     @State private var apiService = MoviesApiService()
     
-    @State private var quantity: Int = 1
+    @State private var quantity: Int = 0
+    @State private var quantityMeia: Int = 0
     let ticketPrice: Decimal = 25.0
+    
+    @State private var selectedShowtime: Showtime?
     
     var body: some View {
         Group {
@@ -32,6 +35,9 @@ struct MovieDetailsView: View {
                 content(movie)
             }
         }
+//        .task(id: movieID) {
+//            await moviesViewModel.getMovieFromApi(id: movieID)
+//        }
         .task(id: movieID) {
             await fetchMovie()
         }
@@ -71,16 +77,82 @@ struct MovieDetailsView: View {
                 
                 Divider()
                 
-                Stepper("Ingressos: \(quantity)", value: $quantity, in: 1...6)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Horários disponíveis").font(.headline)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(movie.showtimes) { showTime in
+                                SessaoCard(
+                                    showtime: showTime,
+                                    isSelected: selectedShowtime?.id == showTime.id
+                                ) {
+                                    selectedShowtime = showTime
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Ingressos:")
+                    
+                    Stepper("Inteira (R$ 25,00): \(quantity)", value: $quantity, in: 0...6)
+                    Stepper("Meia (R$ 12,50): \(quantityMeia)", value: $quantityMeia, in: 0...6)
+                }
+                
+                Divider()
                 
                 HStack {
                     Text("Total").font(.headline)
                     Spacer()
-                    let total = ticketPrice * Decimal(quantity)
+                    let precoInteira = ticketPrice * Decimal(quantity)
+                    let precoMeia = (ticketPrice / 2) * Decimal(quantityMeia)
+                    let total = precoMeia + precoInteira
+                    
                     Text(total, format: .currency(code: "BRL")).font(.title2.bold())
                 }
+                
+                
             }
             .padding()
+            
+            VStack (alignment: .center){
+                Button("Continuar") {
+                    
+                }
+                .foregroundStyle(.white)
+                .padding()
+                .background(Capsule())
+            }
         }
     }
+}
+
+struct SessaoCard: View {
+    let showtime: Showtime
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack {
+                Text(showtime.startTime)
+                    .font(.subheadline)
+                    .bold()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            // Muda a cor de fundo dependendo se está selecionado ou não
+            .background(isSelected ? Color.accentColor : Color(.systemGray6))
+            .foregroundColor(isSelected ? .white : .primary)
+            .cornerRadius(10)
+        }
+    }
+}
+
+// MARK: - Previews com Dados Mockados
+
+#Preview {
+    MovieDetailsView(movieID: "1")
 }
