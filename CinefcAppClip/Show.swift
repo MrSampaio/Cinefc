@@ -18,15 +18,15 @@ struct Show: Identifiable, Equatable {
 enum ShowRepository {
     // PoC: mock. Trocar por uma chamada à API ou mocks de filmes.
     
-    static func fetch(id: String) async throws -> Show {
-        try await Task.sleep(for: .milliseconds(400))
-        guard id == "banda-rock" else { throw URLError(.fileDoesNotExist) }
-        return Show(id: id,
-                    title: "Banda Rock Live",
-                    venue: "Allianz Parque, São Paulo",
-                    date: .now.addingTimeInterval(60 * 60 * 24 * 30),
-                    unitPrice: 180)
-    }
+//    static func fetch(id: String) async throws -> Show {
+//        try await Task.sleep(for: .milliseconds(400))
+//        guard id == "banda-rock" else { throw URLError(.fileDoesNotExist) }
+//        return Show(id: id,
+//                    title: "Banda Rock Live",
+//                    venue: "Allianz Parque, São Paulo",
+//                    date: .now.addingTimeInterval(60 * 60 * 24 * 30),
+//                    unitPrice: 180)
+//    }
     
     
 }
