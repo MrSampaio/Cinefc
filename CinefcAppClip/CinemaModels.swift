@@ -20,10 +20,11 @@ struct MovieDetails: Codable, Identifiable {
 struct Showtime: Codable, Identifiable {
     let id: Int
     let startTime: String
+    let seats: [Seat]?
 }
 
 // SeatDTO
-struct Seat: Codable, Identifiable {
+struct Seat: Codable, Identifiable, Hashable{
     let id: Int
     let rowLetter: String
     let seatNumber: Int

@@ -2,47 +2,63 @@
 //  ListSeatsView.swift
 //  Cinefc
 //
-//  Created by Isabella Avelina on 04/11/26.
-//
 
 import SwiftUI
 
 struct ListSeatsView: View {
     @Environment(\.dismiss) private var dismiss
-
-    private let seats: [SeatItem] = [
-        SeatItem(label: "A1", isAvailable: true),  SeatItem(label: "A2", isAvailable: true),
-        SeatItem(label: "A3", isAvailable: false), SeatItem(label: "A4", isAvailable: true),
-        SeatItem(label: "B1", isAvailable: true),  SeatItem(label: "B2", isAvailable: false),
-        SeatItem(label: "B3", isAvailable: false), SeatItem(label: "B4", isAvailable: true),
-        SeatItem(label: "C1", isAvailable: true),  SeatItem(label: "C2", isAvailable: true),
-        SeatItem(label: "C3", isAvailable: true),  SeatItem(label: "C4", isAvailable: false),
-        SeatItem(label: "D1", isAvailable: false), SeatItem(label: "D2", isAvailable: true),
-        SeatItem(label: "D3", isAvailable: true),  SeatItem(label: "D4", isAvailable: true)
-    ]
-
+    
+    let showtimeID: Int
+    @State private var seats: [Seat] = []
+    @State private var isLoading = true
+    
+    @State private var apiService = MoviesApiService()
+    
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
-
+    
     var body: some View {
         VStack(spacing: 0) {
             header
-            content
+            
+            if isLoading {
+                Spacer()
+                ProgressView("Carregando assentos...")
+                Spacer()
+            } else {
+                content
+            }
+            
             footer
         }
         .background(Color(.systemBackground))
         .ignoresSafeArea(edges: .top)
+        .task {
+            await fetchSeats()
+        }
     }
-
+    
+    private func fetchSeats() async {
+        isLoading = true
+        
+        do {
+            let fetchedSeats = try await apiService.fetchSeats(showtimeID: showtimeID)
+            self.seats = fetchedSeats
+            self.isLoading = false
+        } catch {
+            self.isLoading = false
+        }
+    }
+    
     private var header: some View {
         ZStack(alignment: .bottomLeading) {
             Color(.systemGray4)
-
+            
             LinearGradient(
                 colors: [.clear, .black.opacity(0.7)],
                 startPoint: .center,
                 endPoint: .bottom
             )
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text("Filme")
                     .font(.title.bold())
@@ -54,41 +70,28 @@ struct ListSeatsView: View {
         }
         .frame(height: 410)
         .clipped()
-        .overlay(alignment: .top) {
-        }
     }
-
-    private func circleButton(systemName: String) -> some View {
-        Button {
-            dismiss()
-        } label: {
-            Image(systemName: systemName)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 40)
-                .background(.ultraThinMaterial, in: Circle())
-        }
-    }
-
-
+    
     private var content: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Cadeiras disponíveis")
                 .font(.headline)
-
+            
             legend
                 .frame(maxWidth: .infinity)
-
-            LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(seats) { seat in
-                    SeatButton(seat: seat)
+            
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 12) {
+                    ForEach(seats) { seat in
+                        SeatButton(seat: seat)
+                    }
                 }
+                .padding(.horizontal, 12)
             }
-            .padding(.horizontal, 12)
         }
         .padding(24)
     }
-
+    
     private var legend: some View {
         HStack(spacing: 16) {
             Label {
@@ -105,12 +108,11 @@ struct ListSeatsView: View {
         .font(.caption)
         .foregroundStyle(.secondary)
     }
-
-
+    
     private var footer: some View {
         VStack(spacing: 0) {
             Divider()
-
+            
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.red)
@@ -119,7 +121,7 @@ struct ListSeatsView: View {
                         Image(systemName: "film")
                             .foregroundStyle(.white)
                     }
-
+                
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Distribuído por")
                         .font(.caption)
@@ -137,9 +139,9 @@ struct ListSeatsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-
+                
                 Spacer()
-
+                
                 Button("Abrir") {
                 }
                 .buttonStyle(.borderedProminent)
@@ -153,37 +155,21 @@ struct ListSeatsView: View {
 }
 
 private struct SeatButton: View {
-    let label: String
-    // true = disponível (verde), false = ocupado (cinza)
-    @State private var isAvailable: Bool
-
-    init(seat: SeatItem) {
-        self.label = seat.label
-        _isAvailable = State(initialValue: seat.isAvailable)
-    }
-
+    let seat: Seat
+    
     var body: some View {
         Button {
         } label: {
-            Text(label)
+            Text("\(seat.rowLetter)\(seat.seatNumber)")
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
         }
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)
-        .tint(isAvailable ? .green : .gray)
+        .tint(seat.isAvailable ? .green : .gray)
+        .disabled(!seat.isAvailable)
         .foregroundStyle(.white)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 30))
     }
-}
-
-private struct SeatItem: Identifiable {
-    let id = UUID()
-    let label: String
-    let isAvailable: Bool
-}
-
-#Preview {
-    ListSeatsView()
 }

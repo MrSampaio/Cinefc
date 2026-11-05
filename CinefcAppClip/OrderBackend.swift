@@ -11,7 +11,6 @@ protocol OrderBackend {
     func createOrder(show: Show, quantity: Int, email: String?, paymentToken: Data) async throws -> Order
 }
 
-// PoC: simula POST /orders. Em produção, envie o token ao PSP e crie o pedido no servidor.
 struct MockOrderBackend: OrderBackend {
     func createOrder(show: Show, quantity: Int, email: String?, paymentToken: Data) async throws -> Order {
         try await Task.sleep(for: .seconds(1))
