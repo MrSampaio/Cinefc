@@ -42,6 +42,11 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
+				Obsoleto/ApplePayService.swift,
+				Obsoleto/Order.swift,
+				Obsoleto/OrderBackend.swift,
+				Obsoleto/PurchaseConfirmationView.swift,
+				Obsoleto/Show.swift,
 			);
 			target = 368DDEC5309A726C0064C352 /* CinefcAppClip */;
 		};
@@ -55,17 +60,12 @@
 		368DDED8309A72980064C352 /* Exceptions for "CinefcAppClip" folder in "Cinefc" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				ApplePayService.swift,
-				CinemaModels.swift,
-				DeepLink.swift,
-				ListSeatsView.swift,
-				MovieDetailsView.swift,
-				MoviesApiService.swift,
-				MoviesViewModel.swift,
-				Order.swift,
-				OrderBackend.swift,
-				PurchaseConfirmationView.swift,
-				Show.swift,
+				Services/CinemaModels.swift,
+				Services/MoviesApiService.swift,
+				ViewModels/DeepLink.swift,
+				ViewModels/MoviesViewModel.swift,
+				Views/ListSeatsView.swift,
+				Views/MovieDetailsView.swift,
 			);
 			target = 36441CB430967C3F007A719C /* Cinefc */;
 		};
