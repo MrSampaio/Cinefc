@@ -9,7 +9,7 @@ import PassKit
 struct MovieDetailsView: View {
     let movieID: String
     
-    @State private var movie: MovieDetails?
+    @State var movie: MovieDetails?
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
     
@@ -72,8 +72,14 @@ struct MovieDetailsView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
                                 ForEach(movie.showtimes) { showTime in
-                                    // CORREÇÃO: Passa apenas o ID da sessão
-                                    NavigationLink(destination: ListSeatsView(showtimeID: showTime.id)) {
+
+                                    NavigationLink(
+                                        destination: ListSeatsView(
+                                            showtimeID: showTime.id,
+                                            movieName: movie.title,
+                                            showtime: showTime.startTime
+                                        )
+                                    ) {
                                         SessaoCard(showtime: showTime)
                                     }
                                 }
