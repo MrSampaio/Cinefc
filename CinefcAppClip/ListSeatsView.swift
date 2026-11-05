@@ -9,32 +9,44 @@ struct ListSeatsView: View {
     @Environment(\.dismiss) private var dismiss
     
     let showtimeID: Int
-    @State private var seats: [Seat] = []
-    @State private var isLoading = true
+    @State var seats: [Seat] = []
+    @State var movieName: String = ""
+    @State var showtime: String
+    @State var isLoading = true
     
     @State private var apiService = MoviesApiService()
     
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            
-            if isLoading {
-                Spacer()
-                ProgressView("Carregando assentos...")
-                Spacer()
-            } else {
-                content
+        
+        ScrollView{
+            VStack(spacing: 0) {
+//                header
+                
+                if isLoading {
+                    Spacer()
+                    ProgressView("Carregando assentos...")
+                    Spacer()
+                } else {
+                    content
+                }
+                
+                footer
             }
-            
-            footer
+//            .padding(.top, 24)
+            .background(Color(.systemBackground))
+            .ignoresSafeArea(edges: .top)
+            .task {
+                await fetchSeats()
+            }
         }
-        .background(Color(.systemBackground))
-        .ignoresSafeArea(edges: .top)
-        .task {
-            await fetchSeats()
-        }
+
+        .navigationTitle("\(movieName) • \(showtime)")
+        .navigationBarTitleDisplayMode(.large)
+//        .documentLaunchTitle("Filme")
+//        .navigationTitle("Filme")
+        
     }
     
     private func fetchSeats() async {
@@ -48,29 +60,29 @@ struct ListSeatsView: View {
             self.isLoading = false
         }
     }
-    
-    private var header: some View {
-        ZStack(alignment: .bottomLeading) {
-            Color(.systemGray4)
-            
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.7)],
-                startPoint: .center,
-                endPoint: .bottom
-            )
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Filme")
-                    .font(.title.bold())
-                Text("classificacao · duracao · Legendado/dublado")
-                    .font(.caption)
-            }
-            .foregroundStyle(.white)
-            .padding(20)
-        }
-        .frame(height: 410)
-        .clipped()
-    }
+//    
+//    private var header: some View {
+//        ZStack(alignment: .top) {
+//            Color(.systemGray4)
+////            
+////            LinearGradient(
+////                colors: [.clear, .black.opacity(0.7)],
+////                startPoint: .center,
+////                endPoint: .bottom
+////            )
+//            
+////            VStack(alignment: .leading, spacing: 4) {
+////                Text("Filme")
+////                    .font(.title.bold())
+////                Text("classificacao · duracao · Legendado/dublado")
+////                    .font(.caption)
+////            }
+////            .foregroundStyle(.white)
+////            .padding(20)
+//        }
+//        .frame(height: 200)
+//        .clipped()
+//    }
     
     private var content: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -118,7 +130,7 @@ struct ListSeatsView: View {
                     .fill(.red)
                     .frame(width: 32, height: 32)
                     .overlay {
-                        Image(systemName: "film")
+                        Image(systemName: "AppIcon")
                             .foregroundStyle(.white)
                     }
                 
@@ -127,7 +139,7 @@ struct ListSeatsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     HStack(spacing: 4) {
-                        Text("CineLume")
+                        Text("CineFC")
                             .font(.subheadline.weight(.semibold))
                         Text("4+")
                             .font(.system(size: 9, weight: .medium))

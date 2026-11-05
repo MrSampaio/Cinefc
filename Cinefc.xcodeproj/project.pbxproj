@@ -38,6 +38,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		360F5106309D0A8400474A71 /* Exceptions for "Cinefc" folder in "CinefcAppClip" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+			);
+			target = 368DDEC5309A726C0064C352 /* CinefcAppClip */;
+		};
 		368DDED3309A726D0064C352 /* Exceptions for "CinefcAppClip" folder in "CinefcAppClip" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -67,6 +74,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		36441CB730967C3F007A719C /* Cinefc */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				360F5106309D0A8400474A71 /* Exceptions for "Cinefc" folder in "CinefcAppClip" target */,
+			);
 			path = Cinefc;
 			sourceTree = "<group>";
 		};
