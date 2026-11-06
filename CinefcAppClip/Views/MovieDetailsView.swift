@@ -19,6 +19,11 @@ struct MovieDetailsView: View {
     @State private var quantityMeia: Int = 0
     let ticketPrice: Decimal = 25.0
     
+    private let rows = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+    
     var body: some View {
         Group {
             if isLoading {
@@ -70,9 +75,9 @@ struct MovieDetailsView: View {
                         Text("Horários disponíveis").font(.headline)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
+                            
+                            LazyHGrid(rows: rows, spacing: 12) {
                                 ForEach(movie.showtimes) { showTime in
-
                                     NavigationLink(
                                         destination: ListSeatsView(
                                             showtimeID: showTime.id,
@@ -84,6 +89,8 @@ struct MovieDetailsView: View {
                                     }
                                 }
                             }
+                            .frame(height: 110)
+                            
                         }
                     }
                     
@@ -97,7 +104,10 @@ struct MovieDetailsView: View {
                     Divider()
                     
                     HStack {
-                        Text("Total").font(.headline)
+                        Text("Total")
+                            .font(.headline)
+                            .foregroundStyle(Color.accent)
+                        
                         Spacer()
                         
                         let precoInteira = ticketPrice * Decimal(quantity)
@@ -107,8 +117,9 @@ struct MovieDetailsView: View {
                         Text(total, format: .currency(code: "BRL")).font(.title2.bold())
                     }
                 }
-                .padding()
+                .padding(20)
             }
+            .scrollIndicators(.hidden)
         }
     }
 }
@@ -124,7 +135,7 @@ struct SessaoCard: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.blue)
+        .background(Color.accentColor)
         .foregroundColor(.white)
         .cornerRadius(10)
     }
