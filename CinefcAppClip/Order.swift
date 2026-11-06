@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Order: Equatable {
+struct Order: Equatable, Identifiable {
     let id: String
     let ticketCode: String
     let showTitle: String

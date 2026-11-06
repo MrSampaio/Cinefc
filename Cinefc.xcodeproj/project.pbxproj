@@ -43,7 +43,6 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				Obsoleto/ApplePayService.swift,
-				Obsoleto/Order.swift,
 				Obsoleto/OrderBackend.swift,
 				Obsoleto/PurchaseConfirmationView.swift,
 				Obsoleto/Show.swift,
@@ -60,6 +59,7 @@
 		368DDED8309A72980064C352 /* Exceptions for "CinefcAppClip" folder in "Cinefc" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Order.swift,
 				Services/CinemaModels.swift,
 				Services/MoviesApiService.swift,
 				ViewModels/DeepLink.swift,
