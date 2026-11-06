@@ -7,6 +7,7 @@ import SwiftUI
 
 struct ListSeatsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     
     let showtimeID: Int
     @State var seats: [Seat] = []
@@ -19,7 +20,7 @@ struct ListSeatsView: View {
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
     var body: some View {
-        
+            
         ScrollView{
             VStack(spacing: 0) {
 //                header
@@ -41,7 +42,7 @@ struct ListSeatsView: View {
                 await fetchSeats()
             }
         }
-
+        .scrollIndicators(.hidden)
         .navigationTitle("\(movieName) • \(showtime)")
         .navigationBarTitleDisplayMode(.large)
 //        .documentLaunchTitle("Filme")
@@ -109,12 +110,14 @@ struct ListSeatsView: View {
             Label {
                 Text("Disponível")
             } icon: {
-                Circle().fill(.green).frame(width: 10, height: 10)
+                Circle().fill(.accent).frame(width: 10, height: 10)
             }
             Label {
                 Text("Ocupado")
             } icon: {
-                Circle().fill(.gray).frame(width: 10, height: 10)
+                Circle()
+                    .fill(colorScheme == .dark ? Color(.systemGray2) : .seatOccupied)
+                    .frame(width: 10, height: 10)
             }
         }
         .font(.caption)
@@ -130,8 +133,8 @@ struct ListSeatsView: View {
                     .fill(.red)
                     .frame(width: 32, height: 32)
                     .overlay {
-                        Image(systemName: "AppIcon")
-                            .foregroundStyle(.white)
+                        Image("AppIcon")
+//                            .foregroundStyle(.white)
                     }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -167,6 +170,7 @@ struct ListSeatsView: View {
 }
 
 private struct SeatButton: View {
+    @Environment(\.colorScheme) private var colorScheme
     let seat: Seat
     
     var body: some View {
@@ -177,11 +181,14 @@ private struct SeatButton: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
         }
+        
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)
-        .tint(seat.isAvailable ? .green : .gray)
+        .tint(seat.isAvailable ? .accent : .seatOccupied)
         .disabled(!seat.isAvailable)
-        .foregroundStyle(.white)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 30))
+        .foregroundStyle(
+            seat.isAvailable ? .white : colorScheme == .dark ? .white : .black
+        )
+        .background(.ultraThinMaterial, in: Capsule())
     }
 }
