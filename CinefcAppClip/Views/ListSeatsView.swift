@@ -9,25 +9,34 @@ struct ListSeatsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     
-    let showtimeID: Int
-    @State var seats: [Seat] = []
-    @State var movieName: String = ""
-    @State var showtime: String
-    @State var isLoading = true
+    // Recebe os dados da tela anterior
+    let movie: MovieDetails
+    let quantity: Int
+    let quantityMeia: Int
+    let total: Decimal
+    
+    // Estados para controlar os assentos e a sessão selecionada
+    @State private var selectedShowtimeID: Int?
+    @State private var seats: [Seat] = []
+    @State private var isLoading = false
     
     @State private var apiService = MoviesApiService()
     
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
     var body: some View {
-            
-        ScrollView{
+        ScrollView {
             VStack(spacing: 0) {
-//                header
+                // Menu superior de horários
+                showtimeMenu
+                    .padding(.vertical, 16)
+                
+                Divider()
                 
                 if isLoading {
                     Spacer()
-                    ProgressView("Carregando assentos...")
+                    ProgressView("Carregando mapa de assentos...")
+                        .padding(.top, 40)
                     Spacer()
                 } else {
                     content
@@ -35,23 +44,21 @@ struct ListSeatsView: View {
                 
                 footer
             }
-//            .padding(.top, 24)
-            .background(Color(.systemBackground))
-            .ignoresSafeArea(edges: .top)
-            .task {
-                await fetchSeats()
+            .background(Color(.cineBackground))
+        }
+        .navigationTitle("Assentos")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            if let firstShowtime = movie.showtimes.first {
+                selectedShowtimeID = firstShowtime.id
+                await fetchSeats(for: firstShowtime.id)
             }
         }
-        .scrollIndicators(.hidden)
-        .navigationTitle("\(movieName) • \(showtime)")
-        .navigationBarTitleDisplayMode(.large)
-//        .documentLaunchTitle("Filme")
-//        .navigationTitle("Filme")
-        
     }
     
-    private func fetchSeats() async {
+    private func fetchSeats(for showtimeID: Int) async {
         isLoading = true
+        seats = []
         
         do {
             let fetchedSeats = try await apiService.fetchSeats(showtimeID: showtimeID)
@@ -61,46 +68,51 @@ struct ListSeatsView: View {
             self.isLoading = false
         }
     }
-//    
-//    private var header: some View {
-//        ZStack(alignment: .top) {
-//            Color(.systemGray4)
-////            
-////            LinearGradient(
-////                colors: [.clear, .black.opacity(0.7)],
-////                startPoint: .center,
-////                endPoint: .bottom
-////            )
-//            
-////            VStack(alignment: .leading, spacing: 4) {
-////                Text("Filme")
-////                    .font(.title.bold())
-////                Text("classificacao · duracao · Legendado/dublado")
-////                    .font(.caption)
-////            }
-////            .foregroundStyle(.white)
-////            .padding(20)
-//        }
-//        .frame(height: 200)
-//        .clipped()
-//    }
+    
+    // Scroll Horizontal com os horários
+    private var showtimeMenu: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Horários disponíveis")
+                .font(.headline)
+                .padding(.horizontal, 24)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(movie.showtimes) { showTime in
+                        Button {
+                            selectedShowtimeID = showTime.id
+                            Task {
+                                await fetchSeats(for: showTime.id)
+                            }
+                        } label: {
+                            Text(showTime.startTime)
+                                .font(.subheadline)
+                                .bold()
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(selectedShowtimeID == showTime.id ? Color.blue : Color(.systemGray5))
+                                .foregroundColor(selectedShowtimeID == showTime.id ? .white : .primary)
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+            }
+        }
+    }
     
     private var content: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Cadeiras disponíveis")
-                .font(.headline)
-            
             legend
                 .frame(maxWidth: .infinity)
+                .padding(.bottom, 10)
             
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(seats) { seat in
-                        SeatButton(seat: seat)
-                    }
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(seats) { seat in
+                    SeatButton(seat: seat)
                 }
-                .padding(.horizontal, 12)
             }
+            .padding(.horizontal, 12)
         }
         .padding(24)
     }
@@ -116,7 +128,8 @@ struct ListSeatsView: View {
                 Text("Ocupado")
             } icon: {
                 Circle()
-                    .fill(colorScheme == .dark ? Color(.systemGray2) : .seatOccupied)
+//                    .fill(colorScheme == .dark ? Color(.systemGray2) : .gray)
+                    .fill(.gray)
                     .frame(width: 10, height: 10)
             }
         }
@@ -129,66 +142,48 @@ struct ListSeatsView: View {
             Divider()
             
             HStack(spacing: 12) {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.red)
-                    .frame(width: 32, height: 32)
-                    .overlay {
-                        Image("AppIcon")
-//                            .foregroundStyle(.white)
-                    }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Distribuído por")
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Total a pagar")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    HStack(spacing: 4) {
-                        Text("CineFC")
-                            .font(.subheadline.weight(.semibold))
-                        Text("4+")
-                            .font(.system(size: 9, weight: .medium))
-                            .padding(.horizontal, 4)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 3)
-                                    .stroke(.secondary, lineWidth: 0.5)
-                            )
-                            .foregroundStyle(.secondary)
-                    }
+                    Text(total, format: .currency(code: "BRL"))
+                        .font(.title3.bold())
                 }
                 
                 Spacer()
                 
-                Button("Abrir") {
+                // Futura navegação para o simulador de pagamento
+                Button("Ir para Pagamento") {
+                    // Ação de ir para pagamento será adicionada depois
                 }
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
-                .controlSize(.small)
+                .controlSize(.large)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
         }
     }
 }
-
 private struct SeatButton: View {
-    @Environment(\.colorScheme) private var colorScheme
     let seat: Seat
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         Button {
+            if seat.isAvailable {
+                // Ação para selecionar cadeiras (será feita no próximo passo)
+            }
         } label: {
             Text("\(seat.rowLetter)\(seat.seatNumber)")
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
         }
-        
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)
-        .tint(seat.isAvailable ? .accent : .seatOccupied)
-        .disabled(!seat.isAvailable)
-        .foregroundStyle(
-            seat.isAvailable ? .white : colorScheme == .dark ? .white : .black
-        )
+        .tint(seat.isAvailable ? Color.accentColor : Color.gray)
+        .foregroundStyle((colorScheme == .dark || seat.isAvailable) ? .white : .black)
         .background(.ultraThinMaterial, in: Capsule())
     }
 }
