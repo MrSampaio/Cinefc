@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import PassKit
 
 struct ListSeatsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -28,6 +29,60 @@ struct ListSeatsView: View {
     @State private var completedOrder: Order? = nil
     
     @State private var apiService = MoviesApiService()
+    
+    // verifica onde tá rodando
+    private var isRunningOnSimulator: Bool {
+#if targetEnvironment(simulator)
+        return true
+#else
+        return false
+#endif
+    }
+    
+    private func simulatePayment() {
+        
+        guard totalIngressos > 0 else {
+            paymentError = "Selecione pelo menos um ingresso."
+            return
+        }
+        
+        guard selectedSeats.count == totalIngressos else {
+            paymentError = "Selecione todos os assentos."
+            return
+        }
+        
+        let unitPrice = total / Decimal(totalIngressos)
+        
+        let paymentShow = Show(
+            id: String(movie.id),
+            title: movie.title,
+            venue: "Cinema CineFC",
+            date: .now,
+            unitPrice: unitPrice
+        )
+        
+        isPaymentInProgress = true
+        paymentError = nil
+        
+        Task { @MainActor in
+            do {
+                let order = try await applePayService.simulatePayment(
+                    show: paymentShow,
+                    quantity: totalIngressos
+                )
+                
+                isPaymentInProgress = false
+                completedOrder = order
+            } catch {
+                print("erro na simulação:", error)
+                
+                isPaymentInProgress = false
+                paymentError = "não foi possível concluir a simulação."
+            }
+        }
+    }
+    
+    
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
     var body: some View {
@@ -105,7 +160,6 @@ struct ListSeatsView: View {
         VStack(alignment: .leading, spacing: 16) {
             legend.frame(maxWidth: .infinity).padding(.bottom, 10)
             
-            // Aviso dinâmico de contagem de lugares
             HStack {
                 Text("Selecione \(totalIngressos) assento(s)")
                     .font(.subheadline)
@@ -143,7 +197,7 @@ struct ListSeatsView: View {
         }
     }
     
-    private var legend: some View { /* Sem alterações */
+    private var legend: some View {
         HStack(spacing: 16) {
             Label { Text("Disponível") } icon: { Circle().fill(.accent).frame(width: 10, height: 10) }
             Label { Text("Ocupado") } icon: { Circle().fill(.gray).frame(width: 10, height: 10) }
@@ -172,17 +226,49 @@ struct ListSeatsView: View {
                 
                 Spacer()
                 
-                Button(action: startPayment) {
-                    if isPaymentInProgress {
-                        ProgressView().tint(.white)
-                    } else {
-                        Text(selectedSeats.count == totalIngressos ? "Pagar com Pay" : "Escolha cadeiras")
+                VStack(spacing: 10) {
+                    PayWithApplePayButton(
+                        .buy,
+                        action: startPayment
+                    )
+                    .payWithApplePayButtonStyle(
+                        colorScheme == .dark ? .white : .black
+                    )
+                    .frame(width: 190, height: 50)
+                    .disabled(
+                        selectedSeats.count != totalIngressos ||
+                        isPaymentInProgress
+                    )
+                    .opacity(
+                        selectedSeats.count == totalIngressos &&
+                        !isPaymentInProgress
+                        ? 1
+                        : 0.5
+                    )
+                    
+#if targetEnvironment(simulator)
+                    Button(action: simulatePayment) {
+                        if isPaymentInProgress {
+                            ProgressView()
+                        } else {
+                            Label(
+                                "Concluir simulação",
+                                systemImage: "checkmark.circle"
+                            )
+                        }
                     }
+                    .buttonStyle(.bordered)
+                    .disabled(
+                        selectedSeats.count != totalIngressos ||
+                        isPaymentInProgress
+                    )
+                    
+                    Text("Modo de apresentação: nenhuma cobrança será realizada.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+#endif
                 }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
-                .controlSize(.large)
-                .disabled(selectedSeats.count != totalIngressos || isPaymentInProgress)
             }
             .padding(.horizontal, 24).padding(.vertical, 16)
         }
@@ -203,41 +289,77 @@ struct ListSeatsView: View {
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
-            
-            // As Cores: Laranja se selecionado, Azul se livre, Cinza se ocupado
             .tint(isSelected ? .orange : (seat.isAvailable ? Color.accentColor : .gray))
             .disabled(!seat.isAvailable)
-            
-            // Letra: Sempre branca se DarkMode/Disponível, ou Preta no modo claro
             .foregroundStyle((colorScheme == .dark || seat.isAvailable) ? .white : .black)
             .background(.ultraThinMaterial, in: Capsule())
         }
     }
     
+    // função que começa o processo de pagamento
     private func startPayment() {
-        let mockShow = Show(
+        
+        guard totalIngressos > 0 else {
+            paymentError = "selecione pelo menos um ingresso."
+            return
+        }
+        
+        guard selectedSeats.count == totalIngressos else {
+            paymentError = "selecione todos os assentos."
+            return
+        }
+        
+        let unitPrice = total / Decimal(totalIngressos)
+        
+        let paymentShow = Show(
             id: String(movie.id),
             title: movie.title,
             venue: "Cinema CineFC",
             date: .now,
-            unitPrice: total / Decimal(totalIngressos)
+            unitPrice: unitPrice
         )
         
         isPaymentInProgress = true
         paymentError = nil
         
-        Task {
+        // task para validar o dtatus do apple pay service e exibir os erros
+        Task { @MainActor in
             do {
-                let order = try await applePayService.pay(show: mockShow, quantity: totalIngressos)
-                self.completedOrder = order
-            } catch {
-                if let payError = error as? ApplePayService.PayError, payError == .cancelled {
-                    self.paymentError = "Pagamento cancelado."
-                } else {
-                    self.paymentError = "Ocorreu um erro no pagamento."
+                let order = try await applePayService.pay(
+                    show: paymentShow,
+                    quantity: totalIngressos
+                )
+                
+                isPaymentInProgress = false
+                completedOrder = order
+            } catch let error as ApplePayService.PayError {
+                isPaymentInProgress = false
+                
+                print("erro do Apple Pay:", error.localizedDescription)
+                
+                switch error {
+                    case .cancelled:
+                        paymentError = "Pagamento cancelado."
+                        
+                    case .unavailable:
+                        paymentError =
+                        "Apple Pay indisponível neste dispositivo."
+                        
+                    case .presentationFailed:
+                        paymentError =
+                        "Não foi possível abrir o Apple Pay."
+                        
+                    case .paymentFailed:
+                        paymentError =
+                        "Não foi possível concluir a simulação."
                 }
+            } catch {
+                isPaymentInProgress = false
+                
+                print("Erro:", error)
+                
+                paymentError = error.localizedDescription
             }
-            isPaymentInProgress = false
         }
     }
 }
