@@ -19,10 +19,11 @@ struct MovieDetailsView: View {
     @State private var quantityMeia: Int = 0
     let ticketPrice: Decimal = 25.0
     
-    private let rows = [
-        GridItem(.flexible(), spacing: 12),
-        GridItem(.flexible(), spacing: 12)
-    ]
+    var totalPrice: Decimal {
+        let precoInteira = ticketPrice * Decimal(quantity)
+        let precoMeia = (ticketPrice / 2) * Decimal(quantityMeia)
+        return precoMeia + precoInteira
+    }
     
     var body: some View {
         Group {
@@ -71,31 +72,9 @@ struct MovieDetailsView: View {
                     
                     Divider()
                     
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Horários disponíveis").font(.headline)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            
-                            LazyHGrid(rows: rows, spacing: 12) {
-                                ForEach(movie.showtimes) { showTime in
-                                    NavigationLink(
-                                        destination: ListSeatsView(
-                                            showtimeID: showTime.id,
-                                            movieName: movie.title,
-                                            showtime: showTime.startTime
-                                        )
-                                    ) {
-                                        SessaoCard(showtime: showTime)
-                                    }
-                                }
-                            }
-                            .frame(height: 110)
-                            
-                        }
-                    }
-                    
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Ingressos:")
+                            .font(.headline)
                         
                         Stepper("Inteira (R$ 25,00): \(quantity)", value: $quantity, in: 0...6)
                         Stepper("Meia (R$ 12,50): \(quantityMeia)", value: $quantityMeia, in: 0...6)
@@ -104,39 +83,27 @@ struct MovieDetailsView: View {
                     Divider()
                     
                     HStack {
-                        Text("Total")
-                            .font(.headline)
-                            .foregroundStyle(Color.accent)
-                        
+                        Text("Total").font(.headline)
                         Spacer()
-                        
-                        let precoInteira = ticketPrice * Decimal(quantity)
-                        let precoMeia = (ticketPrice / 2) * Decimal(quantityMeia)
-                        let total = precoMeia + precoInteira
-                        
-                        Text(total, format: .currency(code: "BRL")).font(.title2.bold())
+                        Text(totalPrice, format: .currency(code: "BRL")).font(.title2.bold())
                     }
+                    
+                    // botão para ir para a tela de assentos
+                    NavigationLink(destination: ListSeatsView(movie: movie, quantity: quantity, quantityMeia: quantityMeia, total: totalPrice)) {
+                        Text("Escolher assentos")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background((quantity + quantityMeia > 0) ? Color.green : Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                    }
+                    .disabled(quantity + quantityMeia == 0)
+                    .padding(.top, 10)
                 }
                 .padding(20)
             }
             .scrollIndicators(.hidden)
         }
-    }
-}
-
-struct SessaoCard: View {
-    let showtime: Showtime
-    
-    var body: some View {
-        VStack {
-            Text(showtime.startTime)
-                .font(.subheadline)
-                .bold()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.accentColor)
-        .foregroundColor(.white)
-        .cornerRadius(10)
     }
 }

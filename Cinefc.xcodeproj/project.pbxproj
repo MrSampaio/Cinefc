@@ -42,11 +42,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				Obsoleto/ApplePayService.swift,
-				Obsoleto/Order.swift,
 				Obsoleto/OrderBackend.swift,
-				Obsoleto/PurchaseConfirmationView.swift,
-				Obsoleto/Show.swift,
 			);
 			target = 368DDEC5309A726C0064C352 /* CinefcAppClip */;
 		};
@@ -60,16 +56,30 @@
 		368DDED8309A72980064C352 /* Exceptions for "CinefcAppClip" folder in "Cinefc" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Services/CinemaModels.swift,
+				Models/CinemaModels.swift,
+				Models/Show.swift,
+				Order.swift,
+				Services/ApplePayService.swift,
 				Services/MoviesApiService.swift,
 				ViewModels/DeepLink.swift,
 				ViewModels/MoviesViewModel.swift,
 				Views/ListSeatsView.swift,
 				Views/MovieDetailsView.swift,
+				Views/PurchaseConfirmationView.swift,
 			);
 			target = 36441CB430967C3F007A719C /* Cinefc */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		360F51D630A1583B00474A71 /* Exceptions for "CinefcAppClip" folder in "Copy Bundle Resources" phase from "CinefcAppClip" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 368DDEC4309A726C0064C352 /* Resources */;
+			membershipExceptions = (
+				CinefcAppClip.entitlements,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		36441CB730967C3F007A719C /* Cinefc */ = {
@@ -85,6 +95,7 @@
 			exceptions = (
 				368DDED8309A72980064C352 /* Exceptions for "CinefcAppClip" folder in "Cinefc" target */,
 				368DDED3309A726D0064C352 /* Exceptions for "CinefcAppClip" folder in "CinefcAppClip" target */,
+				360F51D630A1583B00474A71 /* Exceptions for "CinefcAppClip" folder in "Copy Bundle Resources" phase from "CinefcAppClip" target */,
 			);
 			path = CinefcAppClip;
 			sourceTree = "<group>";
@@ -384,12 +395,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sampaio.Cinefc.Cinefc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -398,6 +413,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Cinefc/CinefcRelease.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YDGZTDXJVC;
@@ -417,12 +433,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sampaio.Cinefc.Cinefc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -471,7 +491,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = CinefcAppClip/CinefcAppClip.entitlements;
+				CODE_SIGN_ENTITLEMENTS = CinefcAppClip/CinefcAppClipRelease.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YDGZTDXJVC;
