@@ -63,7 +63,9 @@ struct PurchaseConfirmationView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
+
             }
+            .tint(.green)
             .buttonStyle(.borderedProminent)
         }
         .padding(24)

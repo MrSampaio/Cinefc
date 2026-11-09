@@ -145,7 +145,7 @@ struct ListSeatsView: View {
                             Text(showTime.startTime)
                                 .font(.subheadline).bold()
                                 .padding(.horizontal, 16).padding(.vertical, 12)
-                                .background(selectedShowtimeID == showTime.id ? Color.blue : Color(.systemGray5))
+                                .background(selectedShowtimeID == showTime.id ? Color.green : Color(.systemGray5))
                                 .foregroundColor(selectedShowtimeID == showTime.id ? .white : .primary)
                                 .cornerRadius(10)
                         }
@@ -289,7 +289,7 @@ struct ListSeatsView: View {
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
-            .tint(isSelected ? .orange : (seat.isAvailable ? Color.accentColor : .gray))
+            .tint(isSelected ? .orange : (seat.isAvailable ? Color.green : .gray))
             .disabled(!seat.isAvailable)
             .foregroundStyle((colorScheme == .dark || seat.isAvailable) ? .white : .black)
             .background(.ultraThinMaterial, in: Capsule())

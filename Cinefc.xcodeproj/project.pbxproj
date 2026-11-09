@@ -43,7 +43,6 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				Obsoleto/OrderBackend.swift,
-				Obsoleto/Show.swift,
 			);
 			target = 368DDEC5309A726C0064C352 /* CinefcAppClip */;
 		};
@@ -57,9 +56,10 @@
 		368DDED8309A72980064C352 /* Exceptions for "CinefcAppClip" folder in "Cinefc" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Models/CinemaModels.swift,
+				Models/Show.swift,
 				Order.swift,
 				Services/ApplePayService.swift,
-				Services/CinemaModels.swift,
 				Services/MoviesApiService.swift,
 				ViewModels/DeepLink.swift,
 				ViewModels/MoviesViewModel.swift,

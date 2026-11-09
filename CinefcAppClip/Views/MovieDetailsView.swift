@@ -88,13 +88,13 @@ struct MovieDetailsView: View {
                         Text(totalPrice, format: .currency(code: "BRL")).font(.title2.bold())
                     }
                     
-                    // Botão para ir para a tela de assentos
+                    // botão para ir para a tela de assentos
                     NavigationLink(destination: ListSeatsView(movie: movie, quantity: quantity, quantityMeia: quantityMeia, total: totalPrice)) {
                         Text("Escolher assentos")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .background((quantity + quantityMeia > 0) ? Color.blue : Color.gray)
+                            .background((quantity + quantityMeia > 0) ? Color.green : Color.gray)
                             .foregroundColor(.white)
                             .cornerRadius(12)
                     }
