@@ -21,6 +21,8 @@ class MoviesApiService {
         self.errorMessage = nil
         
         print(id)
+        
+        // verifica a url formada com o parâmetro
         guard let url = URL(string: "https://movies-api-7009.onrender.com/api/cinema/movies/\(id)") else {
             self.isLoading = false
             self.errorMessage = "URL inválida."
@@ -35,12 +37,14 @@ class MoviesApiService {
             
             let (data, response) = try await customSession.data(from: url)
             
+            // verifica resposta do servidor
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 self.errorMessage = "Error when trying to fetch the movie"
                 self.isLoading = false
                 throw URLError(.badServerResponse)
             }
             
+            // decodifica o json recebido pela API
             let decodedMovie = try JSONDecoder().decode(MovieDetails.self, from: data)
             
             self.movie = decodedMovie

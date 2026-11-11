@@ -92,6 +92,7 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
         print("Valor unitário:", show.unitPrice)
         print("Total:", total)
         
+        // inicia nova requisição de pagamento
         let request = PKPaymentRequest()
         
         request.merchantIdentifier = merchantID
@@ -159,10 +160,8 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
         didAuthorizePayment payment: PKPayment,
         handler completion: @escaping (PKPaymentAuthorizationResult) -> Void
     ) {
-//        print("didAuthorizePayment aqui")
         
         guard let show = pendingShow else {
-//            print("Erro: pendingShow está nil")
             
             completion(
                 PKPaymentAuthorizationResult(
@@ -188,19 +187,8 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
             
             return
         }
-//        
-//        print("Criando pedido simulado")
-//        print("Filme:", show.title)
-//        print("Quantidade:", quantity)
-//        print(
-//            "Token recebido:",
-//            payment.token.paymentData.count,
-//            "bytes"
-//        )
         
-        let ticketCode =
-        "TKT-" +
-        String(UUID().uuidString.prefix(8)).uppercased()
+        let ticketCode = "TKT-" + String(UUID().uuidString.prefix(8)).uppercased()
         
         let order = Order(
             id: UUID().uuidString,
@@ -211,7 +199,7 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
         )
         
 
-        // o pedido tem que ser armazenado
+        // armazena o pedido
         completedOrder = order
 
         
