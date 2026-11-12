@@ -7,7 +7,6 @@
 
 import Foundation
 
-// MovieDetailsDTO
 struct MovieDetails: Codable, Identifiable {
     let id: Int
     let title: String
@@ -16,17 +15,19 @@ struct MovieDetails: Codable, Identifiable {
     let showtimes: [Showtime]
 }
 
-// ShowtimeDTO
 struct Showtime: Codable, Identifiable {
     let id: Int
     let startTime: String
     let seats: [Seat]?
 }
 
-// SeatDTO
 struct Seat: Codable, Identifiable, Hashable{
     let id: Int
     let rowLetter: String
     let seatNumber: Int
     let isAvailable: Bool
 }
+
+
+
+

@@ -27,17 +27,20 @@ struct CinefcAppClipApp: App {
                     ProgressView("Abrindo filme…")
                 }
             }
+            
+            // verifica se foi invocado pela aproximação da Tag NFC (Deep Link)
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                 guard let url = activity.webpageURL else { return }
                 print("URL Recebida: ", url.absoluteString)
                 
-                // 1. Lógica correta para extrair da querystring "?id=2"
+                // verifica se a URL possui parâmetros de consulta (query items) válidos
                 guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
                       let queryItems = components.queryItems else {
                     print("URL inválida ou sem parâmetros")
                     return
                 }
                 
+                // extrai o valor do parâmetro "id" ou recorre ao helper alternativo
                 if let idValue = queryItems.first(where: { $0.name == "id" })?.value {
                     print("O ID extraído da Tag NFC é: \(idValue)")
                     self.movieID = idValue
@@ -45,6 +48,7 @@ struct CinefcAppClipApp: App {
                     self.movieID = DeepLink.movieID(from: url)
                 }
             }
+            
             .task {
                 try? await Task.sleep(for: .seconds(3))
                 if movieID == nil { timedOut = true }

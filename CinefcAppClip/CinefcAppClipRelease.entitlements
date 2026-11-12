@@ -4,7 +4,8 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>appclips:cinefc.com</string>
+		<string>appclips:movies-api-7009.onrender.com</string>
+		<string>applinks:cinefc.com</string>
 	</array>
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
